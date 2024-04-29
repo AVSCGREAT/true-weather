@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Website with ChatGPT</title>
+    <!-- Include CSS/JS libraries -->
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat"></div>
+        <button id="send-location-btn">Share Location</button>
+        <input type="text" id="user-input" placeholder="Type a city...">
+        <button id="send-btn">Send</button>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        // JavaScript for fetching weather data and displaying it on the map
+        function fetchWeather(city) {
+            var apiKey = '74bf070af9f37d4ffd40841b4c8e10af';
+            var apiUrl = 'https://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=' + apiKey;
+
+            $.get(apiUrl, function(data) {
+                // Parse weather data and display it on the map
+                var weatherDescription = data.weather[0].description;
+                var temperature = data.main.temp;
+
+                $('#chat').append('<div class="bot-message">The weather in ' + city + ' is ' + weatherDescription + ' with a temperature of ' + temperature + '°C.</div>');
+            });
+        }
+
+        // JavaScript for ChatGPT integration
+        $(document).ready(function() {
+            $('#send-btn').click(function() {
+                var userInput = $('#user-input').val();
+                $('#chat').append('<div class="user-message">' + userInput + '</div>');
+                $('#user-input').val('');
+
+                fetchWeather(userInput); // Fetch weather data based on user input
+            });
+
+            // Request user's location when clicking on the share location button
+            $('#send-location-btn').click(function() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        var latitude = position.coords.latitude;
+                        var longitude = position.coords.longitude;
+
+                        // Use reverse geocoding to get the city based on coordinates
+                        // Then fetch weather data for that city
+                        var apiUrl = 'https://api.openweathermap.org/data/2.5/weather?lat=' + latitude + '&lon=' + longitude + '&appid=' + apiKey;
+                        $.get(apiUrl, function(data) {
+                            var city = data.name;
+                            fetchWeather(city);
+                        });
+                    });
+                } else {
+                    $('#chat').append('<div class="bot-message">Geolocation is not supported by this browser.</div>');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
